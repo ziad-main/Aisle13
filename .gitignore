@@ -1,0 +1,28 @@
+﻿# Unity generated folders
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild*/
+[Ll]ogs/
+
+# User-specific
+UserSettings/
+MemoryCaptures/
+.vs/
+.idea/
+*.csproj
+*.sln
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Unity cache
+sysinfo.txt
+
+# Build artifacts
+*.apk
+*.aab
+*.exe
+*.app
+*.ipa
