@@ -15,6 +15,7 @@ public class Aim : MonoBehaviour
     
     [Header("UI References")]
     public TextMeshProUGUI promptText;
+    public TextMeshProUGUI headerText;
     public Image crosshair;
 
     private float xRotation = 0f;

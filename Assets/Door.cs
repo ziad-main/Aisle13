@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 public class Door : MonoBehaviour, IInteractable
 {
@@ -6,16 +8,36 @@ public class Door : MonoBehaviour, IInteractable
     public DoorLock doorLock;
     public float openAngle = 90f;
     public float openSpeed = 2f;
+    public string doorLabel = "Door";
+    public bool finalDoor = false;
+
+    [Header("Unlock Message")]
+    public string unlockMessage = "Door Unlocked";
+    public float unlockMessageDuration = 2f;
+    public Camera mainCamera;
     
     private bool isOpen = false;
     private bool isOpening = false;
     private Quaternion closedRotation;
     private Quaternion openRotation;
+    private Aim aimScript;
+    
 
     void Start()
     {
         closedRotation = transform.rotation;
         openRotation = closedRotation * Quaternion.Euler(0,0 , openAngle);
+
+        // Find the Aim script from the Camera
+        
+        if (mainCamera != null)
+        {
+            aimScript = mainCamera.GetComponent<Aim>();
+            if (aimScript == null)
+            {
+                Debug.LogWarning("Aim script not found on Camera!");
+            }
+        }
     }
 
     void Update()
@@ -37,19 +59,30 @@ public class Door : MonoBehaviour, IInteractable
         }
     }
 
+    private IEnumerator ShowUnlockMessage()
+    {
+        if (aimScript != null && aimScript.promptText != null)
+        {
+            aimScript.headerText.text = unlockMessage;
+            yield return new WaitForSeconds(unlockMessageDuration);
+            aimScript.headerText.text = "";
+        }
+    }
+
     public string GetPromptMessage()
     {
         // If door has a lock and it's not unlocked
         if (doorLock != null && !doorLock.IsUnlocked())
         {
+            if (doorLabel == "Main Door")
+            {
+                return "Weird... This main door is closed. There must be another way out.";
+            }
             if (Inventory.Instance.HasItem(doorLock.requiredKeyName))
             {
                 return "Press [E] to unlock door";
             }
-            else
-            {
-                return "Door is locked. Find a key.";
-            }
+            return "Door is locked. Find a key.";
         }
 
         // If door is unlocked or has no lock
@@ -71,7 +104,7 @@ public class Door : MonoBehaviour, IInteractable
             if (doorLock.TryUnlock())
             {
                 Debug.Log("Door unlocked!");
-                // Don't open yet, just unlock
+                StartCoroutine(ShowUnlockMessage());
                 return;
             }
             else
@@ -84,5 +117,11 @@ public class Door : MonoBehaviour, IInteractable
         // Toggle door open/close
         isOpen = !isOpen;
         isOpening = true;
+        if(isOpen && finalDoor)
+        {
+            Debug.Log("Final door opened. You escaped!");
+            SceneManager.LoadScene("Game Over");
+
+        }
     }
 }
